@@ -6,9 +6,10 @@
 //
 
 import UIKit
-//import DropDown
 
 class ViewController: UIViewController {
+   // MARK: - Initial View Properties
+   private var vStack = UIStackView()
    private var vStackWidth: CGFloat {
       return view.frame.width * 0.65
    }
@@ -21,123 +22,81 @@ class ViewController: UIViewController {
    private var vStackY: CGFloat {
       return (view.frame.height - vStackHeight) / 2
    }
-   private var vStack: UIStackView = {
-      let stack = UIStackView()
-      stack.alignment = .center
-      stack.axis = .vertical
-      stack.distribution = .fillEqually
-      stack.contentMode = .scaleToFill
-      stack.spacing = 40
-      stack.backgroundColor = .clear
-      stack.alpha = 1
-      stack.isHidden = false
-      stack.clipsToBounds = true
-      stack.translatesAutoresizingMaskIntoConstraints = true
-      return stack
-   }()
-   
    private var songButton = Button(title: "Song")
    private var soundButton = Button(title: "Sound")
    private var timeButton = Button(title: "Time")
-   private var buttons = [Button]()
    private var stackHeight: CGFloat {
       return (Button.preferredHeight * CGFloat(3)) + (Button.preferredSpacing * CGFloat(3))
    }
    
+   // MARK: - DropDown Properties
+   private let transparentView = UIView()
    private let songData = ["Samurai", "Arcade", "Retro"]
    private let soundData = ["Sword", "Pop"]
    private let timeData = ["5 seconds", "10 seconds", "15 seconds"]
-   private var dataSources = [[String]]()
-//   private let songDropDown = DropDown()
-//   private let soundDropDown = DropDown()
-//   private let timeDropDown = DropDown()
-//   private var dropDowns = [DropDown]()
+   private let songTableView = UITableView()
+   private let soundTableView = UITableView()
+   private let timeTableView = UITableView()
    
-   private let transparentView: UIView = {
-      let view = UIView()
-      view.translatesAutoresizingMaskIntoConstraints = true
-      view.clipsToBounds = true
-      view.backgroundColor = .black.withAlphaComponent(0.4)
-      view.isUserInteractionEnabled = true
-      view.alpha = 0
-      view.isHidden = true
-      return view
-   }()
-//   private let songTableView: UITableView = {
-//      let tableView = UITableView()
-//      tableView.translatesAutoresizingMaskIntoConstraints = false
-//      tableView.clipsToBounds = true
-//      tableView.alpha = 0
-//      tableView.isHidden = true
-//      tableView.layer.cornerRadius = 8
-//      tableView.register(UINib(nibName: DropCell.id, bundle: nil), forCellReuseIdentifier: DropCell.id)
-//      return tableView
-//   }()
-   
-   private let testView: UIView = {
-      let view = UIView()
-      view.translatesAutoresizingMaskIntoConstraints = false
-      view.clipsToBounds = true
-      view.backgroundColor = .blue
-      view.layer.cornerRadius = 8
-      view.alpha = 1
-      view.isHidden = false
-      return view
-   }()
-   
-   
-   private let songTableView = TableView(dataSource: ["Samurai", "Arcade", "Retro"])
    private var songTableY: CGFloat {
-      return vStack.frame.minY + Button.preferredHeight
+      let buttonStartPoint = vStack.frame.origin.y + Button.preferredHeight + (Button.borderWidth * 2)
+      let preferredHeight = Button.preferredHeight * CGFloat(songData.count)
+      if buttonStartPoint + preferredHeight > view.frame.height {
+         let topStartPoint = vStackY - preferredHeight
+         if topStartPoint >= 0 {
+            return topStartPoint
+         } else {
+            let midStartPoint = (view.frame.height - vStackY) / 2
+            return midStartPoint
+         }
+      }
+      return buttonStartPoint
    }
-   private var songTableHeight: CGFloat {
-      return DropCell.preferredHeight * CGFloat(songTableView.dataSource.count)
+   private var soundTableY: CGFloat {
+      let buttonStartPoint = vStack.frame.origin.y + (Button.preferredHeight * 2) + Button.preferredSpacing + (Button.borderWidth * 5.5)
+      let preferredHeight = Button.preferredHeight * CGFloat(soundData.count)
+      if buttonStartPoint + preferredHeight > view.frame.height {
+         let topStartPoint = vStackY - preferredHeight
+         if topStartPoint >= 0 {
+            return topStartPoint
+         } else {
+            let midStartPoint = (view.frame.height - vStackY) / 2
+            return midStartPoint
+         }
+      }
+      return buttonStartPoint
    }
-   
-   private let soundTableView = TableView(dataSource: ["Sword", "Pop"])
-   private var soundTableHeight: CGFloat {
-      return DropCell.preferredHeight * CGFloat(soundTableView.dataSource.count)
+   private var timeTableY: CGFloat {
+      let buttonStartPoint = vStack.frame.origin.y + (Button.preferredHeight * 3) + (Button.preferredSpacing * 2) + (Button.borderWidth * 9)
+      let preferredHeight = Button.preferredHeight * CGFloat(timeData.count)
+      if buttonStartPoint + preferredHeight > view.frame.height {
+         let topStartPoint = vStackY - preferredHeight
+         if topStartPoint >= 0 {
+            return topStartPoint
+         } else {
+            let midStartPoint = (view.frame.height - vStackY) / 2
+            return midStartPoint
+         }
+      }
+      return buttonStartPoint
    }
-   
-   private let timeTableView = TableView(dataSource: ["5 seconds", "10 seconds", "15 seconds"])
-   private var timeTableHeight: CGFloat {
-      return DropCell.preferredHeight * CGFloat(timeTableView.dataSource.count)
-   }
-   
-   
    
    // MARK: - Lifecycle
    override func viewDidLoad() {
       super.viewDidLoad()
-//      print("Screen size: \(view.frame)")
       view.backgroundColor = .systemIndigo
-      setupDataSources()
-      
       setupStack()
-//      setupDropDowns()
       setupCustomDropDowns()
    }
    
-   private func setupDataSources() {
-//      dropDowns = [songDropDown, soundDropDown, timeDropDown]
-      dataSources = [songData, soundData, timeData]
-      buttons = [songButton, soundButton, timeButton]
-   }
-   
    private func setupStack() {
+      vStack.initializeVerticalStackView()
       vStack.frame = CGRect(
          x: vStackX,
          y: vStackY,
          width: vStackWidth,
          height: vStackHeight)
       view.addSubview(vStack)
-//      print("vStack.frame: \(vStack.frame)")
-//      NSLayoutConstraint.activate([
-//         vStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-//         vStack.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-//         vStack.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.65),
-//         vStack.heightAnchor.constraint(equalToConstant: stackHeight)
-//      ])
       addButtons()
    }
    
@@ -158,88 +117,50 @@ class ViewController: UIViewController {
    }
    
    private func setupCustomDropDowns() {
+      transparentView.initializeTransparentView()
       let tap = UITapGestureRecognizer(target: self, action: #selector(hideSettingsView))
       transparentView.addGestureRecognizer(tap)
       transparentView.frame = view.frame
-      
       view.addSubview(transparentView)
-      
-      
-      
-//      NSLayoutConstraint.activate([
-//         transparentView.topAnchor.constraint(equalTo: view.topAnchor),
-//         transparentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-//         transparentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-//         transparentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-//      ])
-      
-      
       setupSongDrop()
-//      setupSoundDrop()
-//      setupTimeDrop()
-      
-//      setupTestView()
-//      transparentView.addSubview(songTableView)
-//      NSLayoutConstraint.activate([
-//         songTableView.centerXAnchor.constraint(equalTo: transparentView.centerXAnchor),
-//         songTableView.topAnchor.constraint(equalTo: songButton.bottomAnchor),
-//         songTableView.widthAnchor.constraint(equalTo: songButton.widthAnchor),
-//         songTableView.heightAnchor.constraint(equalToConstant: songTableHeight)
-//      ])
-      
-//      transparentView.addSubview(soundTableView)
-//      NSLayoutConstraint.activate([
-//         soundTableView.centerXAnchor.constraint(equalTo: transparentView.centerXAnchor),
-//         soundTableView.topAnchor.constraint(equalTo: soundButton.bottomAnchor),
-//         soundTableView.widthAnchor.constraint(equalTo: soundButton.widthAnchor),
-//         soundTableView.heightAnchor.constraint(equalToConstant: soundTableHeight)
-//      ])
-//
-//      transparentView.addSubview(timeTableView)
-//      NSLayoutConstraint.activate([
-//         timeTableView.centerXAnchor.constraint(equalTo: transparentView.centerXAnchor),
-//         timeTableView.topAnchor.constraint(equalTo: <#T##NSLayoutAnchor<NSLayoutYAxisAnchor>#>)
-//      ])
-      
+      setupSoundDrop()
+      setupTimeDrop()
    }
    
    private func setupSongDrop() {
+      songTableView.initializeDropDown()
+      songTableView.delegate = self
+      songTableView.dataSource = self
+      view.addSubview(songTableView)
       songTableView.frame = CGRect(
-         x: vStack.frame.minX,
+         x: vStackX,
          y: songTableY,
-         width: vStack.frame.width,
-         height: songTableHeight)
-      transparentView.addSubview(songTableView)
-      songTableView.tableView.frame = songTableView.frame
-      print(songTableView.dataSource) // 1
-      
-      songTableView.setNeedsDisplay()
-      songTableView.tableView.setNeedsDisplay()
-      songTableView.tableView.reloadData()  // 4  WHY not execute first?
-      
-      print(songTableView.frame) // 2
-      print(songTableView.tableView.frame) // 3
-      
+         width: vStackWidth,
+         height: Button.preferredHeight * CGFloat(songData.count))
    }
    
    private func setupSoundDrop() {
-      
-//      transparentView.addSubview(soundTableView)
+      soundTableView.initializeDropDown()
+      soundTableView.delegate = self
+      soundTableView.dataSource = self
+      view.addSubview(soundTableView)
+      soundTableView.frame = CGRect(
+         x: vStackX,
+         y: soundTableY,
+         width: vStackWidth,
+         height: Button.preferredHeight * CGFloat(soundData.count))
    }
    
    private func setupTimeDrop() {
-      
-//      transparentView.addSubview(timeTableView)
-   }
-   
-   private func setupTestView() {
-      transparentView.addSubview(testView)
-      NSLayoutConstraint.activate([
-         testView.centerXAnchor.constraint(equalTo: transparentView.centerXAnchor),
-         testView.centerYAnchor.constraint(equalTo: transparentView.centerYAnchor),
-         testView.widthAnchor.constraint(equalTo: transparentView.widthAnchor, multiplier: 0.65),
-         testView.heightAnchor.constraint(equalTo: transparentView.heightAnchor, multiplier: 0.5)
-      ])
+      timeTableView.initializeDropDown()
+      timeTableView.delegate = self
+      timeTableView.dataSource = self
+      view.addSubview(timeTableView)
+      timeTableView.frame = CGRect(
+         x: vStackX,
+         y: timeTableY,
+         width: vStackWidth,
+         height: Button.preferredHeight * CGFloat(timeData.count))
    }
    
    // MARK: - Animations
@@ -248,8 +169,6 @@ class ViewController: UIViewController {
       UIView.animate(withDuration: 0.5) { [weak self] in
          self?.transparentView.isHidden = false
          self?.transparentView.alpha = 1
-//         self?.songTableView.isHidden = false
-//         self?.songTableView.alpha = 1
       }
    }
    
@@ -267,30 +186,6 @@ class ViewController: UIViewController {
          self?.timeTableView.isHidden = true
       }
    }
-   
-   private func showSongTable() {
-      
-   }
-   
-   
-//   private func setupDropDowns() {
-//      for i in 0..<dropDowns.count {
-//         dropDowns[i].dataSource = dataSources[i]
-//         dropDowns[i].anchorView = buttons[i]
-//         dropDowns[i].direction = .any
-//         dropDowns[i].cellHeight = buttons[i].frame.height
-//         dropDowns[i].cornerRadius = 8
-//         dropDowns[i].textColor = .white
-//         dropDowns[i].backgroundColor = .systemGreen
-//         dropDowns[i].selectionBackgroundColor = .systemGreen
-//         dropDowns[i].separatorColor = .white
-//         dropDowns[i].textFont = UIFont (name: "Chalkboard SE", size: 40) ?? .systemFont(ofSize: 40)
-//         dropDowns[i].bottomOffset = CGPoint(x: 0, y: (dropDowns[i].anchorView?.plainView.bounds.height)!)
-//         dropDowns[i].customCellConfiguration = { (index: Index, item: String, cell: DropDownCell) in
-//            cell.optionLabel.textAlignment = .center
-//         }
-//      }
-//   }
 }
 
 extension ViewController: ButtonDelegate {
@@ -298,16 +193,19 @@ extension ViewController: ButtonDelegate {
       switch buttonTitle {
       case "Song":
          songTableView.isHidden = false
-         songTableView.alpha = 1
-         
+         UIView.animate(withDuration: 0.5) { [weak self] in
+            self?.songTableView.alpha = 1
+         }
       case "Sound":
          soundTableView.isHidden = false
-         soundTableView.alpha = 1
-         
+         UIView.animate(withDuration: 0.5) { [weak self] in
+            self?.soundTableView.alpha = 1
+         }
       case "Time":
          timeTableView.isHidden = false
-         timeTableView.alpha = 1
-         
+         UIView.animate(withDuration: 0.5) { [weak self] in
+            self?.timeTableView.alpha = 1
+         }
       default:
          break
       }
@@ -315,8 +213,52 @@ extension ViewController: ButtonDelegate {
    }
 }
 
-extension ViewController: TableViewDelegate {
-   func cellTapped(fromTableView: String) {
-      print("\(#function) fromTableView: \(fromTableView)")
+extension ViewController: UITableViewDelegate, UITableViewDataSource {
+   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+      switch tableView {
+      case songTableView:
+         return songData.count
+      case soundTableView:
+         return soundData.count
+      case timeTableView:
+         return timeData.count
+      default:
+         fatalError()
+      }
+   }
+   
+   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+      return DropCell.preferredHeight
+   }
+   
+   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+      guard let cell = tableView.dequeueReusableCell(withIdentifier: DropCell.id, for: indexPath) as? DropCell else {
+         fatalError()
+      }
+      switch tableView {
+      case songTableView:
+         cell.configure(title: songData[indexPath.row])
+      case soundTableView:
+         cell.configure(title: soundData[indexPath.row])
+      case timeTableView:
+         cell.configure(title: timeData[indexPath.row])
+      default:
+         fatalError()
+      }
+      return cell
+   }
+   
+   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+      switch tableView {
+      case songTableView:
+         print(songData[indexPath.row])
+      case soundTableView:
+         print(soundData[indexPath.row])
+      case timeTableView:
+         print(timeData[indexPath.row])
+      default:
+         fatalError()
+      }
+      hideSettingsView()
    }
 }

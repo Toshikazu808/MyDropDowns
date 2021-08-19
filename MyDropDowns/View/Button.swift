@@ -16,6 +16,7 @@ final class Button: UIButton {
    var title: String?
    static let preferredHeight: CGFloat = 80
    static let preferredSpacing: CGFloat = 40
+   static let borderWidth: CGFloat = 4
    
    override init(frame: CGRect) {
       super.init(frame: frame)
@@ -24,7 +25,7 @@ final class Button: UIButton {
       titleLabel?.textColor = .white
       titleLabel?.font = UIFont(name: "Chalkboard SE", size: 40)
       layer.cornerRadius = 8
-      layer.borderWidth = 2.5
+      layer.borderWidth = Button.borderWidth
       layer.borderColor = UIColor.white.cgColor
       isUserInteractionEnabled = true
    }
